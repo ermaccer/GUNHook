@@ -1,6 +1,6 @@
 #pragma once
-#include "..\Vector.h"
-#include <d3d9.h>
+#include "Vector.h"
+#include "Matrix.h"
 
 class CCamera {
 public:
@@ -196,7 +196,8 @@ public:
 
 	Vector3D* GetPosition();
 	void	  SetPosition(Vector3D pos);
-	D3DMATRIX* GetMatrix();
+	Matrix* GetMatrix();
+
 };
 
 

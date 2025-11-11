@@ -8,7 +8,11 @@
 #include "Patterns.h"
 
 #define WIN32_LEAN_AND_MEAN
+
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
+
 #include <windows.h>
 #include <algorithm>
 
@@ -60,7 +64,7 @@ static auto& getHints()
 }
 #endif
 
-static void TransformPattern(std::string_view pattern, std::basic_string<uint8_t>& data, std::basic_string<uint8_t>& mask)
+static void TransformPattern(std::string_view pattern, pattern_string& data, pattern_string& mask)
 {
 	uint8_t tempDigit = 0;
 	bool tempFlag = false;
@@ -110,20 +114,28 @@ private:
 	uintptr_t m_begin;
 	uintptr_t m_end;
 
-	template<typename TReturn, typename TOffset>
-	TReturn* getRVA(TOffset rva)
-	{
-		return (TReturn*)(m_begin + rva);
-	}
-
 public:
 	explicit executable_meta(uintptr_t module)
-		: m_begin(module)
 	{
-		PIMAGE_DOS_HEADER dosHeader = getRVA<IMAGE_DOS_HEADER>(0);
-		PIMAGE_NT_HEADERS ntHeader = getRVA<IMAGE_NT_HEADERS>(dosHeader->e_lfanew);
+		PIMAGE_DOS_HEADER dosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(module);
+		PIMAGE_NT_HEADERS ntHeader = reinterpret_cast<PIMAGE_NT_HEADERS>(module + dosHeader->e_lfanew);
 
-		m_end = m_begin + ntHeader->OptionalHeader.SizeOfImage;
+		m_begin = module + ntHeader->OptionalHeader.BaseOfCode;
+		m_end = m_begin + ntHeader->OptionalHeader.SizeOfCode;
+
+		// Executables with DRM bypassed may lie in their SizeOfCode and underreport severely
+		// We can somewhat detect this by checking if the code entry point is past
+		// these boundaries. It's not perfect, but it's safe.
+		const uintptr_t entryPoint = module + ntHeader->OptionalHeader.AddressOfEntryPoint;
+		if (entryPoint >= m_begin && entryPoint < m_end)
+		{
+			return;
+		}
+
+		// Alternate heuristics - scan the entire executable, minus headers
+		const uintptr_t sizeOfHeaders = ntHeader->OptionalHeader.SizeOfHeaders;
+		m_begin = module + sizeOfHeaders;
+		m_end = module + (ntHeader->OptionalHeader.SizeOfImage - sizeOfHeaders);
 	}
 
 	executable_meta(uintptr_t begin, uintptr_t end)

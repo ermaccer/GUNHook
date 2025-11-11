@@ -1,10 +1,11 @@
 #pragma once
 #include "gun/Camera.h"
-#include "plugin/GUNMenu.h"
+#include "plugin/Menu.h"
 #include <Windows.h>
 
 
-namespace Hooks {
-	CCamera* Camera_Constructor_Hook();
-	BOOL __stdcall SetCursorPos_Hook(int X, int Y);
-}
+CCamera* Camera_Constructor_Hook();
+BOOL WINAPI SetCursorPos_Hook(int X, int Y);
+
+int LoadPlayerModel_Hook(const char* model);
+int LoadPlayerAppearance_Hook(int appearance);

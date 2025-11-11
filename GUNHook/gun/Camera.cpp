@@ -1,5 +1,6 @@
 #include "Camera.h"
 
+
 CCamera* TheCamera;
 
 Vector3D* CCamera::GetPosition()
@@ -12,7 +13,7 @@ void CCamera::SetPosition(Vector3D pos)
 	*(Vector3D*)(object + 104) = pos;
 }
 
-D3DMATRIX* CCamera::GetMatrix()
+Matrix* CCamera::GetMatrix()
 {
-	return (D3DMATRIX*)(object + 120);
+	return (Matrix*)(object + 136);
 }

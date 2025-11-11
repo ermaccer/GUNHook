@@ -1,21 +1,45 @@
 #include "Hooks.h"
 #include "gun/Hash.h"
-#include "plugin/PatternHelper.h"
+#include "plugin/PatternSolver.h"
+#include "plugin/Menu.h"
+#include "gun/Player.h"
+#include "gun/Appearance.h"
+#include "gun/Script.h"
 
-CCamera* Hooks::Camera_Constructor_Hook()
+CCamera* Camera_Constructor_Hook()
 {
-	static unsigned int cam_pat = _pat("56 68 E4 00 00 00 E8 ? ? ? ? 8B F0", 0, __FUNCTION__);
-
-	CCamera* cam = ((CCamera*(__cdecl*)())cam_pat)();
-	if (cam)
-		TheCamera = cam;
+	static uintptr_t pat = _pattern(PATID_CameraConstructor);
+	CCamera* cam = nullptr;
+	if (pat)
+	{
+		cam = ((CCamera * (__cdecl*)())pat)();
+		if (cam)
+			TheCamera = cam;
+	}
 
 	return cam;
 }
 
-BOOL __stdcall Hooks::SetCursorPos_Hook(int X, int Y)
+BOOL WINAPI SetCursorPos_Hook(int X, int Y)
 {
-	if (!TheMenu->m_bActive)
+	if (!TheMenu->m_bIsActive)
 		return SetCursorPos(X, Y);
 	return 0;
+}
+
+
+int LoadPlayerModel_Hook(const char* model)
+{
+	if (TheMenu->m_bChangePlayerSkin)
+		model = TheMenu->m_selectedPlayerSkin.modelName;
+
+	return LoadPlayerModel(model);
+}
+
+int LoadPlayerAppearance_Hook(int appearance)
+{
+	if (TheMenu->m_bChangePlayerSkin)
+		appearance = FindScriptGlobalObject(_hash(TheMenu->m_selectedPlayerSkin.appearanceName));
+
+	return LoadAppearance(appearance);
 }

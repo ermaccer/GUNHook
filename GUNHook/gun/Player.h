@@ -1,5 +1,5 @@
 #pragma once
-#include "..\Vector.h"
+#include "Vector.h"
 
 class CPlayer {
 public:
@@ -16,3 +16,5 @@ public:
 };
 
 CPlayer* FindPlayer();
+
+int LoadPlayerModel(const char* model);

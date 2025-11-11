@@ -1,10 +1,22 @@
 #include "Player.h"
-#include "../plugin/PatternHelper.h"
+#include "../plugin/PatternSolver.h"
 
 CPlayer* FindPlayer()
 {
-	static unsigned int player_pat = _pat("83 EC 44 56 8B F1 8B 0D", 8, __FUNCTION__);
-	return *(CPlayer**)(*(unsigned int*)player_pat);
+	static uintptr_t pat = _pattern(PATID_FindPlayer);
+	if (pat)
+		return *(CPlayer**)(*(unsigned int*)pat);
+
+	return nullptr;
+}
+
+int LoadPlayerModel(const char* model)
+{
+	static uintptr_t pat = _pattern(PATID_LoadPlayerModel);
+	if (pat)
+		return ((int(__cdecl*)(const char*))pat)(model);
+
+	return 0;
 }
 
 Vector3D* CPlayer::GetPosition()
