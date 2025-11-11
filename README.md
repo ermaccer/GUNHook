@@ -4,7 +4,7 @@ Free camera and more for GUN.
 
 # Installation
 
-GUNHook should work with every game release but only **GOG** was officially tested.
+GUNHook should work with every game release but only **GOG** and **Steam** were officially tested.
 
 You can download binary files from [Releases](https://github.com/ermaccer/GUNHook/) page. Extract **GUNHook.zip**
 to root folder of GUN.
